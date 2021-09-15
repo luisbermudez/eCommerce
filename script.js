@@ -40,13 +40,14 @@ itemsArray.forEach((item,i)=>{
     // What item the user wants to buy, its name, its price and its image
     list.innerHTML += 
     `<li>
-        <div>Name: ${item.name}<div>
-        <div>Price: ${item.price}<div>
+        <div><b>Item:</b> ${item.name}<div>
+        <div><b>Price:</b> $${item.price}<div>
         <img src='${item.image}' /> <br>
         <input type="number" placeholder="quantity" onchange='inputChange(${i}, "${item.name}", "${item.price}", "${item.image}")' />
         <button>Buy Item</button>
     </li>`
 })
+
 // Empty cart array, to store the items the user wants to buy
 let cartArray = [];
 // The function is called when the user enters a number at the quantity input
@@ -67,13 +68,54 @@ function inputChange(i, name, price, image) {
     // The quantity - comming from the value of the input - the number the user entered at the input
     // The name of the item, the price and its image
     // When the button is clicked, another function is called too - the showCart() functioin
-    button.onclick = function(){
-        cartArray.push({
+    button.onclick = function() {
+        if (cartArray.length < 1 ) {
+            cartArray.push({
             quantity: input.value,
             name: name,
             price: price,
             image: image
-        })
+            })
+            input.value = '';
+            showCart();
+            return;
+        } 
+        
+        // this var will let me know if the <li> has already been created in <ul> - to avoid creating it again
+        let track = false;
+        // The j variable will provide the index inside the cartArray, so it is known where the item is and we can update it
+        let j;
+
+        // This loop will iterate through the array
+        for (j = 0; j < cartArray.length; j++) {
+            // If there is an <li> element with the same name, track will change to true to indicate it
+            // Also, the loop will break, leaving j variable with the index of the item that has the same name, to know which item to update
+            if (cartArray[j].name === name) {
+                track = true;
+                break;
+            } 
+        }
+
+        // This line will be executed when track is true, so instead of creating another <li> we just take the one the already exists and we update the new number
+        if (track) {
+            // 2 variable are created to make the code more clear
+            // This variable will take the quantity value of the existing <li>
+            let amount = Number(cartArray[j].quantity);
+            // This var will take the value the user just entered
+            let entryValue = Number(input.value);
+            // Both values will be added into the existing quantity key
+            cartArray[j].quantity = amount + entryValue;
+            // If track is false then there is no <li> item with the name we are comparing, we can go ahead and have the <li> element pushed
+        } else {
+            cartArray.push({
+            quantity: input.value,
+            name: name,
+            price: price,
+            image: image
+            })
+        }
+
+        input.value = '';
         showCart();
     }
 }
@@ -98,11 +140,13 @@ function showCart() {
         cartItems.innerHTML += 
         `<li>
             <div>Quantity: ${item.quantity}</div>
-            <div>Name: ${item.name}</div>
-            <div>Price: ${item.price}</div>
+            <div>Item: ${item.name}</div>
+            <div>Price: $${item.price}</div>
             <img src='${item.image}' />
         </li>`
     })
+
+        
 
     // We locate the tag with the grandTotal id <span> - with innerHTML we assign the value of the grandTotal var with a $ sign
     document.getElementById('grandTotal').innerHTML = '$' + grandTotal;
